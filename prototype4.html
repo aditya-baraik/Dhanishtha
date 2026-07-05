@@ -66,7 +66,8 @@ ul{ list-style:none; }
 :focus-visible{ outline: 1.5px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
 
 @media (prefers-reduced-motion: reduce){
-  *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  html{ scroll-behavior:auto !important; }
+  .cursor-dot,.cursor-ring{ transition-duration:.01ms !important; }
 }
 
 .grain{
@@ -684,13 +685,11 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
   const splash = document.getElementById('introSplash');
   const sigText = document.querySelector('.intro-sig-text');
   if(!splash) return;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function hide(){
     if(splash.style.display === 'none') return;
     splash.classList.add('is-hiding');
     setTimeout(function(){ splash.style.display = 'none'; }, 1450);
   }
-  if(reduced){ if(sigText) sigText.classList.add('is-ready'); setTimeout(hide, 1200); return; }
 
   function reveal(){
     if(sigText) sigText.classList.add('is-ready');
