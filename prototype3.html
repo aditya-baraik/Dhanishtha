@@ -418,7 +418,7 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
 .floral-splash{
   position:fixed; inset:0; z-index:450; overflow:hidden;
   background: var(--navy);
-  will-change: opacity;
+  will-change: opacity, transform, filter;
   transition: opacity 1s var(--ease-soft);
 }
 .floral-splash.is-gone{ display:none; }
@@ -1027,39 +1027,24 @@ function handleTrackOrder(e){
   const sigText = document.querySelector('.intro-sig-text');
   if(!splash) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let hidden = false;
   function hide(){
-    if(hidden) return;
-    hidden = true;
+    if(splash.style.display === 'none') return;
     splash.classList.add('is-hiding');
     setTimeout(function(){ splash.style.display = 'none'; }, 1450);
   }
   if(reduced){ hide(); return; }
 
-  let revealed = false;
   function reveal(){
-    if(revealed) return;
-    revealed = true;
     if(sigText) sigText.classList.add('is-ready');
     setTimeout(hide, 3400);
   }
-
-  /* Hard safety net — some Android browsers/in-app WebViews (Samsung Internet,
-     WhatsApp/Instagram in-app browser) have a buggy Font Loading API where
-     document.fonts.ready never resolves or document.fonts.load() throws
-     synchronously. That used to crash this whole block and leave the splash
-     stuck at opacity:1 forever, blocking the signature AND everything behind
-     it (floral splash + landing page). This timer fires no matter what. */
-  setTimeout(reveal, 1200);
-
-  try{
-    if(document.fonts && document.fonts.ready){
-      document.fonts.load("100px 'Brittany Signature'").catch(function(){});
-      document.fonts.ready.then(reveal).catch(function(){ reveal(); });
-    } else {
-      reveal();
-    }
-  } catch(e){
+  if(document.fonts && document.fonts.ready){
+    let done = false;
+    function finish(){ if(done) return; done = true; reveal(); }
+    document.fonts.load("100px 'Brittany Signature'").catch(function(){});
+    document.fonts.ready.then(finish);
+    setTimeout(finish, 4500); // safety cap only, in case fonts API hangs
+  } else {
     reveal();
   }
 })();
@@ -1070,48 +1055,26 @@ function handleTrackOrder(e){
   if(!splash) return;
   let gone = false;
 
-  /* Android fix: position:fixed + animated filter:blur() + transform driven
-     together from JS on every scroll tick is a known compositing bug on many
-     Android GPUs (Mali/Adreno older drivers) — the fixed layer freezes and
-     stops repainting entirely, which looked like the pictures/zoom were
-     "stuck". We detect coarse-pointer/touch devices and skip the blur +
-     transform there, keeping only a safe opacity fade. Crossfade (handled by
-     a separate interval toggling classes) and the CSS zoom keyframe on the
-     images are untouched by this and keep working either way. */
-  const isTouch = window.matchMedia('(pointer: coarse)').matches;
-
   function setWrapHeight(){
     if(!heroWrap) return;
     const distance = Math.max(window.innerHeight * 0.72, 420);
     heroWrap.style.height = (window.innerHeight + distance) + 'px';
   }
 
-  let ticking = false;
-  function applyScroll(){
-    ticking = false;
+  function onScroll(){
     const distance = Math.max(window.innerHeight * 0.72, 420);
     const p = Math.min(Math.max(window.scrollY / distance, 0), 1);
     splash.style.opacity = String(1 - p);
-    if(isTouch){
-      splash.style.filter = '';
-      splash.style.transform = '';
-    } else {
-      splash.style.filter = 'blur(' + (p * 16) + 'px)';
-      splash.style.transform = 'translateY(' + (p * -70) + 'px) scale(' + (1 + p * 0.04) + ')';
-    }
+    splash.style.filter = 'blur(' + (p * 16) + 'px)';
+    splash.style.transform = 'translateY(' + (p * -70) + 'px) scale(' + (1 + p * 0.04) + ')';
     if(p >= 1 && !gone){ gone = true; splash.classList.add('is-gone'); }
     else if(p < 1 && gone){ gone = false; splash.classList.remove('is-gone'); }
     splash.style.pointerEvents = p > 0.94 ? 'none' : 'auto';
   }
-  function onScroll(){
-    if(ticking) return;
-    ticking = true;
-    requestAnimationFrame(applyScroll);
-  }
   setWrapHeight();
   window.addEventListener('scroll', onScroll, { passive:true });
   window.addEventListener('resize', function(){ setWrapHeight(); onScroll(); });
-  applyScroll();
+  onScroll();
 })();
 
 (function(){
