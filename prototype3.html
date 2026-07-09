@@ -418,7 +418,7 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
 .floral-splash{
   position:fixed; inset:0; z-index:450; overflow:hidden;
   background: var(--navy);
-  will-change: opacity, transform, filter;
+  will-change: opacity;
   transition: opacity 1s var(--ease-soft);
 }
 .floral-splash.is-gone{ display:none; }
@@ -1070,26 +1070,48 @@ function handleTrackOrder(e){
   if(!splash) return;
   let gone = false;
 
+  /* Android fix: position:fixed + animated filter:blur() + transform driven
+     together from JS on every scroll tick is a known compositing bug on many
+     Android GPUs (Mali/Adreno older drivers) — the fixed layer freezes and
+     stops repainting entirely, which looked like the pictures/zoom were
+     "stuck". We detect coarse-pointer/touch devices and skip the blur +
+     transform there, keeping only a safe opacity fade. Crossfade (handled by
+     a separate interval toggling classes) and the CSS zoom keyframe on the
+     images are untouched by this and keep working either way. */
+  const isTouch = window.matchMedia('(pointer: coarse)').matches;
+
   function setWrapHeight(){
     if(!heroWrap) return;
     const distance = Math.max(window.innerHeight * 0.72, 420);
     heroWrap.style.height = (window.innerHeight + distance) + 'px';
   }
 
-  function onScroll(){
+  let ticking = false;
+  function applyScroll(){
+    ticking = false;
     const distance = Math.max(window.innerHeight * 0.72, 420);
     const p = Math.min(Math.max(window.scrollY / distance, 0), 1);
     splash.style.opacity = String(1 - p);
-    splash.style.filter = 'blur(' + (p * 16) + 'px)';
-    splash.style.transform = 'translateY(' + (p * -70) + 'px) scale(' + (1 + p * 0.04) + ')';
+    if(isTouch){
+      splash.style.filter = '';
+      splash.style.transform = '';
+    } else {
+      splash.style.filter = 'blur(' + (p * 16) + 'px)';
+      splash.style.transform = 'translateY(' + (p * -70) + 'px) scale(' + (1 + p * 0.04) + ')';
+    }
     if(p >= 1 && !gone){ gone = true; splash.classList.add('is-gone'); }
     else if(p < 1 && gone){ gone = false; splash.classList.remove('is-gone'); }
     splash.style.pointerEvents = p > 0.94 ? 'none' : 'auto';
   }
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(applyScroll);
+  }
   setWrapHeight();
   window.addEventListener('scroll', onScroll, { passive:true });
   window.addEventListener('resize', function(){ setWrapHeight(); onScroll(); });
-  onScroll();
+  applyScroll();
 })();
 
 (function(){
