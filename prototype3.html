@@ -105,8 +105,7 @@ body::before{
 .on-dark .eyebrow, .eyebrow.on-dark{ color: var(--gold-bright); }
 
 /* ============== CURSOR — robust, fallback-safe ============== */
-html.has-cursor, html.has-cursor body, html.has-cursor a, html.has-cursor button, html.has-cursor input{ cursor:none !important; }
-.cursor-dot,.cursor-ring{ position:fixed; top:0; left:0; z-index:9999; pointer-events:none; border-radius:50%; will-change:transform; mix-blend-mode:difference; }
+.cursor-dot,.cursor-ring{ display:none !important; }
 .cursor-dot{ width:8px; height:8px; background:#fff; opacity:0; transition:opacity .3s; }
 .cursor-ring{ width:36px; height:36px; border:1.4px solid #fff; opacity:0; transition:opacity .3s, width .3s var(--ease-out), height .3s var(--ease-out); }
 html.has-cursor .cursor-dot, html.has-cursor .cursor-ring{ opacity:1; }
@@ -999,8 +998,9 @@ function handleTrackOrder(e){
   resultEl.classList.add('is-visible');
 }
 
-/* CURSOR — gated on real mousemove, safe fallback to native cursor if it never fires */
+/* CURSOR — disabled, native cursor used */
 (function(){
+  return;
   const dot = document.getElementById('cursorDot');
   const ring = document.getElementById('cursorRing');
   const isFine = window.matchMedia('(pointer: fine)').matches;
