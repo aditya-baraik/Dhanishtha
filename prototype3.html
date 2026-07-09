@@ -178,6 +178,10 @@ html.has-cursor .cursor-dot, html.has-cursor .cursor-ring{ opacity:1; }
 .hero-dots{ position:absolute; bottom:40px; left:50%; transform:translateX(-50%); z-index:2; display:flex; gap:10px; }
 .hero-dots button{ width:22px; height:2px; background:rgba(246,241,231,.35); transition:background .3s, width .3s; }
 .hero-dots button.is-active{ background: var(--gold-bright); width:34px; box-shadow:0 0 12px rgba(231,205,139,.55); }
+.hero-marquee{ position:absolute; left:0; right:0; bottom:0; z-index:2; overflow:hidden; background:rgba(10,10,10,.45); border-top:1px solid rgba(231,205,139,.25); padding:8px 0; backdrop-filter:blur(2px); }
+.hero-marquee-track{ display:flex; width:max-content; white-space:nowrap; animation: marqueeScroll 22s linear infinite; }
+.hero-marquee-track span{ font-family: var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color: var(--gold-bright); padding-right:60px; }
+@keyframes marqueeScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
 
 .reveal{ opacity:0; transform: translateY(28px); transition: opacity .9s var(--ease-out), transform .9s var(--ease-out); }
 .reveal.is-visible{ opacity:1; transform:none; }
@@ -593,6 +597,12 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
     </div>
   </div>
   <div class="hero-dots" id="heroDots"></div>
+  <div class="hero-marquee">
+    <div class="hero-marquee-track">
+      <span>Sorry for the inconvenience, the website is under construction, your patience and cooperation is appreciated.&nbsp;&nbsp;&nbsp;&nbsp;You can also donate us in good will.</span>
+      <span>Sorry for the inconvenience, the website is under construction, your patience and cooperation is appreciated.&nbsp;&nbsp;&nbsp;&nbsp;You can also donate us in good will.</span>
+    </div>
+  </div>
 </header>
 </div>
 
