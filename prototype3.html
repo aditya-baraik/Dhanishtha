@@ -1027,24 +1027,39 @@ function handleTrackOrder(e){
   const sigText = document.querySelector('.intro-sig-text');
   if(!splash) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let hidden = false;
   function hide(){
-    if(splash.style.display === 'none') return;
+    if(hidden) return;
+    hidden = true;
     splash.classList.add('is-hiding');
     setTimeout(function(){ splash.style.display = 'none'; }, 1450);
   }
   if(reduced){ hide(); return; }
 
+  let revealed = false;
   function reveal(){
+    if(revealed) return;
+    revealed = true;
     if(sigText) sigText.classList.add('is-ready');
     setTimeout(hide, 3400);
   }
-  if(document.fonts && document.fonts.ready){
-    let done = false;
-    function finish(){ if(done) return; done = true; reveal(); }
-    document.fonts.load("100px 'Brittany Signature'").catch(function(){});
-    document.fonts.ready.then(finish);
-    setTimeout(finish, 4500); // safety cap only, in case fonts API hangs
-  } else {
+
+  /* Hard safety net — some Android browsers/in-app WebViews (Samsung Internet,
+     WhatsApp/Instagram in-app browser) have a buggy Font Loading API where
+     document.fonts.ready never resolves or document.fonts.load() throws
+     synchronously. That used to crash this whole block and leave the splash
+     stuck at opacity:1 forever, blocking the signature AND everything behind
+     it (floral splash + landing page). This timer fires no matter what. */
+  setTimeout(reveal, 1200);
+
+  try{
+    if(document.fonts && document.fonts.ready){
+      document.fonts.load("100px 'Brittany Signature'").catch(function(){});
+      document.fonts.ready.then(reveal).catch(function(){ reveal(); });
+    } else {
+      reveal();
+    }
+  } catch(e){
     reveal();
   }
 })();
