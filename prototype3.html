@@ -323,6 +323,8 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
 .cart-item-name{ font-family: var(--font-display); font-style:italic; font-size:16px; }
 .cart-item-code{ font-family: var(--font-mono); font-size:10.5px; color: var(--ink-dim); margin-top:4px; }
 .cart-item-price{ font-family: var(--font-mono); font-size:13.5px; color: var(--wine); }
+.cart-item-remove{ font-size:16px; color: var(--ink-dim); line-height:1; align-self:flex-start; margin-left:12px; padding:4px; transition: color .2s; }
+.cart-item-remove:hover{ color: var(--wine); }
 .cart-subtotal{ display:flex; justify-content:space-between; padding-top:20px; margin-top:10px; font-size:14.5px; }
 .cart-subtotal strong{ font-family: var(--font-mono); color: var(--wine); }
 .pay-methods{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:22px 0 24px; }
@@ -477,6 +479,7 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
   .cart-item img{ width:52px; height:64px; }
   .cart-item-name{ font-size:14.5px; }
   .cart-item-price{ font-size:12.5px; }
+  .cart-item-remove{ font-size:15px; margin-left:8px; }
   .modal-title{ font-size:24px; }
   .tester-title{ font-size:20px; }
   .tester-desc{ font-size:12.5px; }
@@ -1181,7 +1184,8 @@ function renderCart(){
     const qtyLabel = entry.qty > 1 ? (entry.qty + ' × ' + sizeLabel) : sizeLabel;
     return '<div class="cart-item"><img src="'+img+'" class="duotone-img" alt="'+item.name+'">'
       + '<div class="cart-item-info"><div class="cart-item-name">'+item.name+'</div><div class="cart-item-code">'+qtyLabel+'</div></div>'
-      + '<div class="cart-item-price">'+formatInr(lineTotal)+'</div></div>';
+      + '<div class="cart-item-price">'+formatInr(lineTotal)+'</div>'
+      + '<button class="cart-item-remove" data-hoverable aria-label="Remove '+item.name+'" onclick="removeFromCart(\''+entry.id+'\')">×</button></div>';
   }).join('') || '<p style="color:var(--ink-dim); font-size:13.5px; padding:20px 0;">Your bag is empty — add a composition or a tester kit to see it here.</p>';
 
   document.getElementById('cartItemCount').textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
