@@ -161,6 +161,12 @@ html.has-cursor .cursor-dot, html.has-cursor .cursor-ring{ opacity:1; }
 .hero-cta-row{ display:flex; gap:18px; margin-top:40px; align-items:center; opacity:0; transform:translateY(10px); animation: fadeUp .9s var(--ease-out) 3.6s forwards; }
 @keyframes fadeUp{ to{ opacity:1; transform:none; } }
 
+.site-notice{ position:relative; z-index:501; background: var(--ink); color: var(--gold-bright); overflow:hidden; white-space:nowrap; padding:9px 0; border-bottom:1px solid var(--gold); }
+.site-notice-track{ display:inline-block; padding-left:100%; animation: noticeScroll 22s linear infinite; }
+.site-notice-track span{ font-family: var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; padding:0 40px; }
+@keyframes noticeScroll{ 0%{ transform:translateX(0); } 100%{ transform:translateX(-50%); } }
+@media (max-width:768px){ .site-notice-track span{ font-size:10px; } }
+
 .btn{ font-family: var(--font-body); font-size:12.5px; letter-spacing:.09em; text-transform:uppercase; font-weight:600; padding:16px 32px; border-radius:1px; display:inline-flex; align-items:center; gap:10px; transition: transform .35s var(--ease-out), background .3s, color .3s, border-color .3s, box-shadow .35s var(--ease-out); }
 .btn-gold{ background: var(--gold-foil); color: var(--ink); box-shadow: var(--shadow-lift), var(--shadow-inset-gold); }
 .btn-gold:hover{ background: var(--gold-bright); transform:translateY(-2px); box-shadow: var(--shadow-deep), var(--shadow-inset-gold); }
@@ -529,7 +535,7 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
     <li><a href="#nakshatra">Nakshatra Collection</a></li>
     <li><a href="#atelier">The Atelier</a></li>
     <li><a href="#journal">Journal</a></li>
-    <li><a href="#" onclick="openModal('trackModal');return false;">Track Order</a></li>
+    <li><a href="#" data-hoverable onclick="openModal('donateModal');return false;">Donate Us</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-icons">
@@ -549,6 +555,13 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
   </div>
 </nav>
 
+<div class="site-notice" aria-label="Site notice">
+  <div class="site-notice-track">
+    <span>SORRY FOR THE INCONVENIENCE — THIS WEBSITE IS UNDER DEVELOPMENT AND BEING ACTIVELY BUILT RIGHT NOW. THANK YOU FOR YOUR PATIENCE.</span>
+    <span>SORRY FOR THE INCONVENIENCE — THIS WEBSITE IS UNDER DEVELOPMENT AND BEING ACTIVELY BUILT RIGHT NOW. THANK YOU FOR YOUR PATIENCE.</span>
+  </div>
+</div>
+
 <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
 <div class="mobile-menu" id="mobileMenu">
   <ul class="mobile-menu-links">
@@ -556,7 +569,7 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
     <li><a href="#nakshatra" data-hoverable onclick="closeMobileMenu()">Nakshatra Collection</a></li>
     <li><a href="#atelier" data-hoverable onclick="closeMobileMenu()">The Atelier</a></li>
     <li><a href="#journal" data-hoverable onclick="closeMobileMenu()">Journal</a></li>
-    <li><a href="#" data-hoverable onclick="closeMobileMenu();openModal('trackModal');">Track Order</a></li>
+    <li><a href="#" data-hoverable onclick="closeMobileMenu();openModal('donateModal');">Donate Us</a></li>
     <li><a href="#contact" data-hoverable onclick="closeMobileMenu()">Contact</a></li>
   </ul>
 </div>
@@ -735,6 +748,32 @@ footer::before{ content:''; position:absolute; top:0; left:0; right:0; height:1p
     </div>
     <p class="pay-note">UI preview only — wire this to a real payment gateway backend before going live to process actual payments.</p>
     <button class="btn btn-gold auth-submit" data-hoverable onclick="handleCheckout()" id="payBtn">Pay ₹0</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="donateModal">
+  <div class="modal-panel">
+    <button class="modal-close" data-hoverable onclick="closeModal('donateModal')">×</button>
+    <div class="modal-title">Donate Us</div>
+    <div class="modal-sub">Support the atelier. Minimum donation ₹501.</div>
+    <div class="field" style="margin-top:22px;">
+      <input type="number" min="501" step="1" placeholder=" " id="donateAmount" oninput="onDonateAmountChange()">
+      <label>Amount (₹)</label>
+    </div>
+    <p id="donateAmountError" style="display:none; color:var(--wine); font-size:12px; margin:-10px 0 16px;">Minimum donation is ₹501.</p>
+    <div class="pay-methods" id="donatePayMethods">
+      <button class="pay-method" data-hoverable onclick="selectDonatePay(this,'Paytm')"><span>Paytm</span><span class="dot"></span></button>
+      <button class="pay-method" data-hoverable onclick="selectDonatePay(this,'Google Pay')"><span>Google Pay</span><span class="dot"></span></button>
+      <button class="pay-method" data-hoverable onclick="selectDonatePay(this,'Navi')"><span>Navi</span><span class="dot"></span></button>
+      <button class="pay-method" data-hoverable onclick="selectDonatePay(this,'UPI ID')"><span>UPI ID</span><span class="dot"></span></button>
+      <button class="pay-method" data-hoverable onclick="selectDonatePay(this,'Card')"><span>Card</span><span class="dot"></span></button>
+      <button class="pay-method" data-hoverable onclick="selectDonatePay(this,'QR')"><span>Generate QR</span><span class="dot"></span></button>
+    </div>
+    <div id="donateQrWrap" style="display:none; text-align:center; margin:8px 0 22px;">
+      <img id="donateQrImg" alt="Scan to pay QR code" style="width:180px; height:180px; margin:0 auto 10px; border:1px solid var(--line-light-strong);">
+      <p style="font-size:12.5px; color:var(--ink-dim);">Scan with any UPI app to donate <strong id="donateQrAmount">₹0</strong></p>
+    </div>
+    <button class="btn btn-gold auth-submit" data-hoverable onclick="handleDonate()" id="donateBtn">Donate ₹0</button>
   </div>
 </div>
 
@@ -1150,6 +1189,33 @@ function smartMailto(e, email){
 }
 
 /* ============== CART ============== */
+const SELLER_UPI_ID = 'param.dave.1111@okhdfcbank';
+const SELLER_UPI_NAME = 'Dhanishtha';
+// TODO: fill these in after creating a Telegram bot via @BotFather
+const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
+const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID';
+
+function buildUpiLink(amount, note){
+  return 'upi://pay?pa=' + encodeURIComponent(SELLER_UPI_ID)
+    + '&pn=' + encodeURIComponent(SELLER_UPI_NAME)
+    + '&am=' + amount
+    + '&cu=INR'
+    + (note ? '&tn=' + encodeURIComponent(note) : '');
+}
+// Opens the device's UPI app chooser (Paytm/GPay/Navi/etc.) with amount pre-filled.
+// Amount cannot be locked once inside the UPI app itself — that screen belongs to the app, not this site.
+function openUpiApp(amount, note){
+  window.location.href = buildUpiLink(amount, note);
+}
+// Fire-and-forget invoice send to Telegram so checkout isn't blocked. Requires bot token + chat id above.
+function sendInvoiceToTelegram(caption){
+  if(TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN') return; // not configured yet
+  fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: caption, parse_mode:'HTML' })
+  }).catch(function(){ /* silent — do not block checkout UX */ });
+}
 function getCatalogItem(id){
   return PRODUCTS.find(function(x){ return x.id === id; }) || TESTER_KITS.find(function(x){ return x.id === id; });
 }
@@ -1229,6 +1295,23 @@ function handleCheckoutDetails(e){
   };
   closeModal('checkoutDetailsModal');
 
+  // 1) background invoice send to Telegram — does not block the UI
+  const subtotalNow = cartSubtotalValue();
+  const invoiceLines = CART.map(function(entry){
+    const item = getCatalogItem(entry.id);
+    return item ? ('• ' + item.name + ' × ' + entry.qty + ' — ' + formatInr(priceToNumber(item.price) * entry.qty)) : '';
+  }).join('\n');
+  sendInvoiceToTelegram(
+    '<b>New Order — Dhanishtha</b>\n' +
+    'Name: ' + shippingDetails.fullName + '\n' +
+    'Email: ' + shippingDetails.email + '\n' +
+    'Phone: ' + shippingDetails.phone + '\n' +
+    'Address: ' + shippingDetails.address + ', ' + shippingDetails.city + ', ' + shippingDetails.state + ' - ' + shippingDetails.pincode + '\n\n' +
+    invoiceLines + '\n\n' +
+    'Total: ' + formatInr(subtotalNow)
+  );
+
+  // 2) forward to payment
   selectedPayMethod = null;
   document.querySelectorAll('#payMethods .pay-method').forEach(function(p){ p.classList.remove('is-selected'); });
   document.getElementById('qrWrap').style.display = 'none';
@@ -1244,9 +1327,9 @@ function selectPay(btn, method){
   btn.classList.add('is-selected');
   selectedPayMethod = method;
   const qrWrap = document.getElementById('qrWrap');
+  const subtotal = cartSubtotalValue();
   if(method === 'QR'){
-    const subtotal = cartSubtotalValue();
-    const upiUrl = 'upi://pay?pa=dhanishtha@upi&pn=Dhanishtha&am=' + subtotal + '&cu=INR';
+    const upiUrl = buildUpiLink(subtotal, 'Dhanishtha order');
     document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(upiUrl);
     document.getElementById('qrAmount').textContent = formatInr(subtotal);
     qrWrap.style.display = 'block';
@@ -1258,12 +1341,58 @@ function selectPay(btn, method){
 function handleCheckout(){
   if(!CART.length){ showToast('Your bag is empty.'); return; }
   if(!selectedPayMethod){ showToast('Please choose a payment method.'); return; }
+  const subtotal = cartSubtotalValue();
   const orderNo = 'DHX-' + Math.floor(10000 + Math.random()*89999);
+  if(['Paytm','Google Pay','Navi','UPI ID'].indexOf(selectedPayMethod) !== -1){
+    openUpiApp(subtotal, 'Order ' + orderNo);
+  }
   closeModal('paymentModal');
   CART = [];
   renderCart();
   selectedPayMethod = null;
   showToast('Order ' + orderNo + ' placed! Confirmation sent to ' + (shippingDetails ? shippingDetails.email : 'your email') + '.');
+}
+
+/* ============== DONATE FLOW ============== */
+let selectedDonatePayMethod = null;
+function onDonateAmountChange(){
+  const val = Number(document.getElementById('donateAmount').value || 0);
+  document.getElementById('donateBtn').textContent = 'Donate ' + formatInr(val);
+  document.getElementById('donateAmountError').style.display = (val > 0 && val < 501) ? 'block' : 'none';
+  const qrWrap = document.getElementById('donateQrWrap');
+  if(qrWrap.style.display === 'block' && val >= 501){
+    const upiUrl = buildUpiLink(val, 'Donation to Dhanishtha');
+    document.getElementById('donateQrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(upiUrl);
+    document.getElementById('donateQrAmount').textContent = formatInr(val);
+  }
+}
+function selectDonatePay(btn, method){
+  document.querySelectorAll('#donatePayMethods .pay-method').forEach(function(p){ p.classList.remove('is-selected'); });
+  btn.classList.add('is-selected');
+  selectedDonatePayMethod = method;
+  const val = Number(document.getElementById('donateAmount').value || 0);
+  const qrWrap = document.getElementById('donateQrWrap');
+  if(method === 'QR' && val >= 501){
+    const upiUrl = buildUpiLink(val, 'Donation to Dhanishtha');
+    document.getElementById('donateQrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(upiUrl);
+    document.getElementById('donateQrAmount').textContent = formatInr(val);
+    qrWrap.style.display = 'block';
+  } else {
+    qrWrap.style.display = 'none';
+  }
+}
+function handleDonate(){
+  const val = Number(document.getElementById('donateAmount').value || 0);
+  if(!val || val < 501){ showToast('Minimum donation is ₹501.'); return; }
+  if(!selectedDonatePayMethod){ showToast('Please choose a payment method.'); return; }
+  if(['Paytm','Google Pay','Navi','UPI ID'].indexOf(selectedDonatePayMethod) !== -1){
+    openUpiApp(val, 'Donation to Dhanishtha');
+  }
+  sendInvoiceToTelegram('<b>New Donation — Dhanishtha</b>\nAmount: ' + formatInr(val) + '\nMethod: ' + selectedDonatePayMethod);
+  closeModal('donateModal');
+  selectedDonatePayMethod = null;
+  document.getElementById('donateAmount').value = '';
+  showToast('Thank you for your donation of ' + formatInr(val) + '!');
 }
 function handleNewsletter(e){ e.preventDefault(); showToast('Subscribed. Welcome to Dhanishtha.'); e.target.reset(); }
 let toastTimer;
